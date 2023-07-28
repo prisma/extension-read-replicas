@@ -1,0 +1,1 @@
+export { readReplicas } from './extension'

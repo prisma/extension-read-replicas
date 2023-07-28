@@ -1,0 +1,26 @@
+{
+  "name": "@prisma/extension-read-replicas",
+  "version": "0.1.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "demo": "node -r esbuild-register demo/index.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "@prisma/client": "5.1.0-integration-fix-result-query-ext.1",
+    "@types/debug": "^4.1.8",
+    "@types/node": "16",
+    "esbuild": "^0.18.17",
+    "esbuild-register": "^3.4.2",
+    "prettier": "^3.0.0",
+    "prisma": "5.1.0-integration-fix-result-query-ext.1",
+    "typescript": "^5.1.6"
+  },
+  "dependencies": {
+    "debug": "^4.3.4"
+  }
+}

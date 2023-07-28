@@ -1,0 +1,32 @@
+version: '3.8'
+services:
+  postgresql-primary:
+    # using bitnami images because unlike official postgres images,
+    # they allow to set up replications easily
+    image: 'bitnami/postgresql:latest'
+    ports:
+      - '6432:6432'
+    environment:
+      - POSTGRESQL_PORT_NUMBER=6432
+      - POSTGRESQL_REPLICATION_MODE=master
+      - POSTGRESQL_REPLICATION_USER=repl_user
+      - POSTGRESQL_REPLICATION_PASSWORD=repl_password
+      - POSTGRESQL_USERNAME=prisma
+      - POSTGRESQL_PASSWORD=prisma
+      - POSTGRESQL_DATABASE=test
+      - POSTGRESQL_PGAUDIT_LOG=read,write
+  postgresql-replica:
+    image: 'bitnami/postgresql:latest'
+    ports:
+      - '7432:7432'
+    depends_on:
+      - postgresql-primary
+    environment:
+      - POSTGRESQL_PORT_NUMBER=7432
+      - POSTGRESQL_REPLICATION_MODE=slave
+      - POSTGRESQL_REPLICATION_USER=repl_user
+      - POSTGRESQL_REPLICATION_PASSWORD=repl_password
+      - POSTGRESQL_MASTER_HOST=postgresql-primary
+      - POSTGRESQL_PASSWORD=my_password
+      - POSTGRESQL_MASTER_PORT_NUMBER=6432
+      - POSTGRESQL_PGAUDIT_LOG=read,write
