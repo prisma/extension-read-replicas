@@ -2,9 +2,29 @@
   "name": "@prisma/extension-read-replicas",
   "version": "0.1.0",
   "description": "",
-  "main": "index.js",
+  "main": "dist/cjs/index.js",
+  "module": "dist/esm/index.mjs",
+  "types": "types/cjs/index.d.ts",
+  "files": [
+    "dist",
+    "types"
+  ],
+  "exports": {
+    ".": {
+      "require": {
+        "default": "./dist/cjs/index.js",
+        "types": "./types/cjs/index.d.ts"
+      },
+      "import": {
+        "default": "./dist/esm/index.mjs",
+        "types": "./types/mjs/index.d.ts"
+      }
+    }
+  },
   "scripts": {
+    "build": "node -r esbuild-register scripts/build.ts",
     "demo": "node -r esbuild-register demo/index.ts",
+    "prepublishOnly": "pnpm build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -15,6 +35,7 @@
     "@types/debug": "^4.1.8",
     "@types/node": "16",
     "esbuild": "^0.18.17",
+    "esbuild-node-externals": "^1.8.0",
     "esbuild-register": "^3.4.2",
     "prettier": "^3.0.0",
     "prisma": "5.1.0-integration-fix-result-query-ext.1",

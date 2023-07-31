@@ -1,0 +1,9 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "rootDir": "src",
+    "module": "ESNext",
+    "declarationDir": "types/esm"
+  },
+  "include": ["./src"]
+}

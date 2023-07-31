@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client'
-import { readReplicas } from '../src/extension'
+import { readReplicas } from '..'
 
 const client = new PrismaClient().$extends(readReplicas({ db: process.env.REPLICA_URL! }))
 

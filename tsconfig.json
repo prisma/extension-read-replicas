@@ -1,14 +1,4 @@
 {
-  "compilerOptions": {
-    "target": "es2020",
-    "module": "commonjs",
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
-    "strict": true,
-    "declaration": true,
-    "emitDeclarationOnly": true,
-    "declarationDir": "types",
-    "rootDir": "./src"
-  },
-  "include": ["./src"]
+  "extends": "./tsconfig.base.json",
+  "include": ["./src", "./demo"]
 }
