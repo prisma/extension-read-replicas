@@ -1,4 +1,4 @@
 node_modules
-types
-dist
+/types
+/dist
 /tests/client

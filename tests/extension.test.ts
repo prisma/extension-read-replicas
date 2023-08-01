@@ -7,6 +7,7 @@ type LogEntry = { server: 'primary' | 'replica'; operation: string }
 
 let logs: LogEntry[]
 function createPrisma() {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
   const clientModule = require('./client')
   const basePrisma = new clientModule.PrismaClient() as PrismaClient
 
