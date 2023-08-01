@@ -1,5 +1,5 @@
 import fs from 'fs/promises'
-import { spawn } from 'child_process'
+import execa from 'execa'
 import path from 'path'
 import esbuild from 'esbuild'
 import { nodeExternalsPlugin } from 'esbuild-node-externals'
@@ -24,9 +24,9 @@ async function build(format: 'cjs' | 'esm') {
     plugins: [nodeExternalsPlugin()],
   })
 
-  await spawn('pnpm', ['tsc', '-p', `tsconfig.${format}.json`], {
-    stdio: 'inherit',
+  await execa('pnpm', ['tsc', '-p', `tsconfig.${format}.json`], {
     cwd: path.resolve(__dirname, '..'),
+    stdio: 'inherit',
   })
 }
 

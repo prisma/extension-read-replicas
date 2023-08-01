@@ -1,11 +1,12 @@
 import { debug as createDebug } from 'debug'
 import { Prisma } from '@prisma/client/extension'
 
-import { ReplicaManager } from './ReplicaManager'
+import { ConfigureReplicaCallback, ReplicaManager } from './ReplicaManager'
 
 export type ReplicasOptions = {
   [datasource: string]: string | string[]
 }
+
 const debug = createDebug('prisma:replicasExtension')
 
 const readOperations = [
@@ -23,10 +24,10 @@ const readOperations = [
   'aggregateRaw',
 ]
 
-export const readReplicas = (options: ReplicasOptions) =>
+export const readReplicas = (options: ReplicasOptions, configureReplicaClient?: ConfigureReplicaCallback) =>
   Prisma.defineExtension((client) => {
     const PrismaClient = Object.getPrototypeOf(client).constructor
-    const datasourceName = Object.keys(options)[0]
+    const datasourceName = Object.keys(options).find((key) => !key.startsWith('$'))
     if (!datasourceName) {
       throw new Error(`Read replicas options must specify a datasource`)
     }
@@ -41,6 +42,7 @@ export const readReplicas = (options: ReplicasOptions) =>
       replicaUrls: urls,
       clientConstructor: PrismaClient,
       datasourceName,
+      configureCallback: configureReplicaClient,
     })
 
     return client.$extends({
