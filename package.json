@@ -25,6 +25,7 @@
     "build": "node -r esbuild-register scripts/build.ts",
     "demo": "node -r esbuild-register demo/index.ts",
     "lint": "eslint . && prettier -c .",
+    "prepare": "husky install",
     "prepublishOnly": "pnpm build",
     "test": "jest",
     "typecheck": "tsc"
@@ -47,7 +48,9 @@
     "eslint": "^8.46.0",
     "eslint-config-prettier": "^8.9.0",
     "execa": "^5.1.1",
+    "husky": "^8.0.3",
     "jest": "^29.6.2",
+    "lint-staged": "^13.2.3",
     "prettier": "^3.0.0",
     "prisma": "5.1.0-integration-fix-result-query-ext.1",
     "typescript": "^5.1.6"
