@@ -1,0 +1,30 @@
+name: CI
+on:
+  push:
+    branches: main
+  pull_request:
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: pnpm/action-setup@v2.4.0
+        with:
+          version: 8
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+      - name: Build
+        run: pnpm build
+      - name: Lint
+        run: pnpm lint
+      - name: Start test container in docker
+        run: docker-compose up --detach
+      - name: Run tests
+        run: pnpm test -- --ci
+        env:
+          DATABASE_URL: 'postgresql://prisma:prisma@localhost:6432/test'
+          REPLICA_URL: 'postgresql://prisma:prisma@localhost:7432/test'
