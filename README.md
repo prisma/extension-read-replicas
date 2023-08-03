@@ -1,4 +1,4 @@
-# @prisma/read-replicas-extension
+# @prisma/extension-read-replicas
 
 This [Prisma Client Extension](https://www.prisma.io/docs/concepts/components/prisma-client/client-extensions) adds read replica support to your Prisma Client.
 
