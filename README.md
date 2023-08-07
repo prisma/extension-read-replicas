@@ -6,13 +6,37 @@ This [Prisma Client Extension](https://www.prisma.io/docs/concepts/components/pr
 
 Works best with Prisma 5.1+. Can work with earlier versions (4.16.2+) if [no result extensions](https://www.prisma.io/docs/concepts/components/prisma-client/client-extensions/result) are used at the same time.
 
+## Installation
+
+Depending on the package manager of your choice:
+
+
+### `npm`:
+
+```sh
+npm install @prisma/extension-read-replicas
+```
+
+### `yarn`:
+
+```sh
+yarn add @prisma/extension-read-replicas
+```
+
+### `pnpm`:
+
+```sh
+pnpm add @prisma/extension-read-replicas
+```
+
+
 ## Usage
 
 ### Initialization
 
 ```ts
 import { PrismaClient } from '@prisma/client'
-import { readReplicas } from '@prisma/read-replicas-extension'
+import { readReplicas } from '@prisma/extension-read-replicas
 
 const prisma = new PrismaClient().$extends(
   readReplicas({
