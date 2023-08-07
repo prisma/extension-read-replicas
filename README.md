@@ -10,7 +10,6 @@ Works best with Prisma 5.1+. Can work with earlier versions (4.16.2+) if [no res
 
 Depending on the package manager of your choice:
 
-
 ### `npm`:
 
 ```sh
@@ -28,7 +27,6 @@ yarn add @prisma/extension-read-replicas
 ```sh
 pnpm add @prisma/extension-read-replicas
 ```
-
 
 ## Usage
 
