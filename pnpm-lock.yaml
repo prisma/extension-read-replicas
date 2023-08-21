@@ -11,8 +11,8 @@ dependencies:
 
 devDependencies:
   '@prisma/client':
-    specifier: 5.1.0-integration-fix-result-query-ext.1
-    version: 5.1.0-integration-fix-result-query-ext.1(prisma@5.1.0-integration-fix-result-query-ext.1)
+    specifier: 5.2.0-dev.72
+    version: 5.2.0-dev.72(prisma@5.2.0-dev.72)
   '@swc/core':
     specifier: ^1.3.73
     version: 1.3.73
@@ -65,8 +65,8 @@ devDependencies:
     specifier: ^3.0.0
     version: 3.0.0
   prisma:
-    specifier: 5.1.0-integration-fix-result-query-ext.1
-    version: 5.1.0-integration-fix-result-query-ext.1
+    specifier: 5.2.0-dev.72
+    version: 5.2.0-dev.72
   typescript:
     specifier: ^5.1.6
     version: 5.1.6
@@ -975,8 +975,8 @@ packages:
       fastq: 1.15.0
     dev: true
 
-  /@prisma/client@5.1.0-integration-fix-result-query-ext.1(prisma@5.1.0-integration-fix-result-query-ext.1):
-    resolution: {integrity: sha512-FejHVLMLJoJKDlMCw15uk5MvAOWDbmXmRQyqkZSZhSLbw+DpV8tyUb52Q1XqMAedzS85kMwDLaTPZhZuD37cMg==}
+  /@prisma/client@5.2.0-dev.72(prisma@5.2.0-dev.72):
+    resolution: {integrity: sha512-pkYvY2HqQgiFE2cIShU/Piow5aJELsZd08keAz7eYWVJaGPcH86zKjUTo+6FRONNXipaM04pZB5knLtANyta7g==}
     engines: {node: '>=16.13'}
     requiresBuild: true
     peerDependencies:
@@ -985,16 +985,16 @@ packages:
       prisma:
         optional: true
     dependencies:
-      '@prisma/engines-version': 5.1.0-22.4b132e0d5319952d155d8bbe2ba802464ebf8c6e
-      prisma: 5.1.0-integration-fix-result-query-ext.1
+      '@prisma/engines-version': 5.2.0-25.2804dc98259d2ea960602aca6b8e7fdc03c1758f
+      prisma: 5.2.0-dev.72
     dev: true
 
-  /@prisma/engines-version@5.1.0-22.4b132e0d5319952d155d8bbe2ba802464ebf8c6e:
-    resolution: {integrity: sha512-XlybQI2nuNV0TMtu+koasybFniRslGNuq0WNHNVqyJ6dmBiTRbhofns+IFLqb0dqsxxP7kCw/XRhxgq1YvmOvw==}
+  /@prisma/engines-version@5.2.0-25.2804dc98259d2ea960602aca6b8e7fdc03c1758f:
+    resolution: {integrity: sha512-jsnKT5JIDIE01lAeCj2ghY9IwxkedhKNvxQeoyLs6dr4ZXynetD0vTy7u6wMJt8vVPv8I5DPy/I4CFaoXAgbtg==}
     dev: true
 
-  /@prisma/engines@5.1.0-integration-fix-result-query-ext.1:
-    resolution: {integrity: sha512-w4tfW5Agm1BNBdq0vZJrFVJ8e25n8T8jvld1E0uim21S2wCyMOsQHiLxswx3qecrIc5nhmybzOnWPuLy5IGquw==}
+  /@prisma/engines@5.2.0-dev.72:
+    resolution: {integrity: sha512-KnS2RsKpEr+T6+QBjyVB2JSeLjmCgJUaeqKloyhVbRyKdVVSVFZEHa+4wspAapf7pNfoXov/cXkMaZq0Vs+dUg==}
     requiresBuild: true
     dev: true
 
@@ -3215,13 +3215,13 @@ packages:
       react-is: 18.2.0
     dev: true
 
-  /prisma@5.1.0-integration-fix-result-query-ext.1:
-    resolution: {integrity: sha512-NSlLVNlxuvdvqjgyqkJzwVNs07BbXhcOeQYH4ejny//82rMSYpYEIpHoFCyMQj8GPlfV8m+Uh6pbgmO/qbaH6Q==}
+  /prisma@5.2.0-dev.72:
+    resolution: {integrity: sha512-ITtvi8N8tqLr+nYh/i1i8W/9V8vzA66a7VDy85dxymFUZ0qoEcIk1PTYgLxExy8MrfdmlAh8E6525oVNHbJJEA==}
     engines: {node: '>=16.13'}
     hasBin: true
     requiresBuild: true
     dependencies:
-      '@prisma/engines': 5.1.0-integration-fix-result-query-ext.1
+      '@prisma/engines': 5.2.0-dev.72
     dev: true
 
   /prompts@2.4.2:

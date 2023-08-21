@@ -4,7 +4,7 @@ import { Prisma } from '@prisma/client/extension'
 import { ConfigureReplicaCallback, ReplicaManager } from './ReplicaManager'
 
 export type ReplicasOptions = {
-  [datasource: string]: string | string[]
+  url: string | string[]
 }
 
 const debug = createDebug('prisma:replicasExtension')
@@ -31,17 +31,16 @@ export const readReplicas = (options: ReplicasOptions, configureReplicaClient?: 
     if (!datasourceName) {
       throw new Error(`Read replicas options must specify a datasource`)
     }
-    let urls = options[datasourceName]
-    if (typeof urls === 'string') {
-      urls = [urls]
-    } else if (!Array.isArray(urls)) {
+    let replicaUrls = options.url
+    if (typeof replicaUrls === 'string') {
+      replicaUrls = [replicaUrls]
+    } else if (!Array.isArray(replicaUrls)) {
       throw new Error(`Replica URLs must be a string or list of strings`)
     }
 
     const replicaManager = new ReplicaManager({
-      replicaUrls: urls,
+      replicaUrls,
       clientConstructor: PrismaClient,
-      datasourceName,
       configureCallback: configureReplicaClient,
     })
 

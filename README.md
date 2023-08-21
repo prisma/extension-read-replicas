@@ -4,7 +4,7 @@ This [Prisma Client Extension](https://www.prisma.io/docs/concepts/components/pr
 
 ## Requirements
 
-Works best with Prisma 5.1+. Can work with earlier versions (4.16.2+) if [no result extensions](https://www.prisma.io/docs/concepts/components/prisma-client/client-extensions/result) are used at the same time.
+Requires Prisma 5.2+.
 
 ## Installation
 
@@ -38,12 +38,10 @@ import { readReplicas } from '@prisma/extension-read-replicas
 
 const prisma = new PrismaClient().$extends(
   readReplicas({
-    db: 'postgresql://replica.example.com:5432/db',
+    url: 'postgresql://replica.example.com:5432/db',
   }),
 )
 ```
-
-Where `db` is the name of your datasource (`datasource` block in the schema file).
 
 All non-transactional read queries will now be executed against the defined replica.  
 Write queries and transactions will be executed against the primary server.
@@ -55,7 +53,7 @@ You can also initialize the extension with an array of replica connection string
 ```ts
 const prisma = new PrismaClient().$extends(
   readReplicas({
-    db: [
+    url: [
       'postgresql://replica-1.example.com:5432/db',
       'postgresql://replica-2.example.com:5432/db',
     ],

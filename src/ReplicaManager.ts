@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client/extension'
 
 type PrismaConstructorOptions = {
-  datasources?: Record<string, { url: string }>
+  datasourceUrl?: string
 }
 
 export type ConfigureReplicaCallback = (client: PrismaClient) => PrismaClient
@@ -12,21 +12,16 @@ interface PrismaClientConstructor {
 type ReplicaManagerOptions = {
   clientConstructor: PrismaClientConstructor
   replicaUrls: string[]
-  datasourceName: string
   configureCallback: ConfigureReplicaCallback | undefined
 }
 
 export class ReplicaManager {
   private _replicaClients: PrismaClient[]
 
-  constructor({ replicaUrls, datasourceName, clientConstructor, configureCallback }: ReplicaManagerOptions) {
-    this._replicaClients = replicaUrls.map((url) => {
+  constructor({ replicaUrls, clientConstructor, configureCallback }: ReplicaManagerOptions) {
+    this._replicaClients = replicaUrls.map((datasourceUrl) => {
       const client = new clientConstructor({
-        datasources: {
-          [datasourceName]: {
-            url,
-          },
-        },
+        datasourceUrl,
       })
 
       if (configureCallback) {
