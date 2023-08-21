@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client'
 import { readReplicas } from '..'
 
-const client = new PrismaClient().$extends(readReplicas({ db: process.env.REPLICA_URL! }))
+const client = new PrismaClient().$extends(readReplicas({ url: process.env.REPLICA_URL! }))
 
 async function main() {
   await client.user.deleteMany()

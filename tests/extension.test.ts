@@ -15,7 +15,7 @@ function createPrisma() {
     .$extends(
       readReplicas(
         {
-          db: process.env.REPLICA_URL!,
+          url: process.env.REPLICA_URL!,
         },
         (client) =>
           (client as PrismaClient).$extends({
