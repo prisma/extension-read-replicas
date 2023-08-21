@@ -34,7 +34,7 @@ pnpm add @prisma/extension-read-replicas
 
 ```ts
 import { PrismaClient } from '@prisma/client'
-import { readReplicas } from '@prisma/extension-read-replicas
+import { readReplicas } from '@prisma/extension-read-replicas'
 
 const prisma = new PrismaClient().$extends(
   readReplicas({
