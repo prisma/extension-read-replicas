@@ -1,6 +1,6 @@
 # @prisma/extension-read-replicas
 
-This [Prisma Client Extension](https://www.prisma.io/docs/concepts/components/prisma-client/client-extensions) adds read replica support to your Prisma Client.
+This [Prisma Client Extension](https://www.prisma.io/docs/concepts/components/prisma-client/client-extensions) adds read replica support to your Prisma Client. Under the hood, this extension creates additional Prisma Clients for the read replica database connection strings, and then routes read queries to these Clients instead of using the primary Prisma Client.
 
 ## Requirements
 
@@ -10,19 +10,19 @@ Requires Prisma 5.2+.
 
 Depending on the package manager of your choice:
 
-### `npm`:
+### `npm`
 
 ```sh
 npm install @prisma/extension-read-replicas
 ```
 
-### `yarn`:
+### `yarn`
 
 ```sh
 yarn add @prisma/extension-read-replicas
 ```
 
-### `pnpm`:
+### `pnpm`
 
 ```sh
 pnpm add @prisma/extension-read-replicas
