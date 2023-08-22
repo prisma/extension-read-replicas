@@ -80,8 +80,8 @@ prisma.$primary().user.findMany({ where: { ... }})
     .$extends(rlsExtension())
     .$extends(
       readReplicas({
-        db: 'postgresql://replica.example.com:5432/db',
+        url: 'postgresql://replica.example.com:5432/db',
       }),
     )
   ```
-- If you are using the read replicas extension with Prisma version below 5.1, any result extensions will not work.
+- If you use the read replicas extension with Prisma version below 5.1, any result extensions will not work.
