@@ -1,8 +1,12 @@
 {
-  "extends": "./tsconfig.base.json",
   "compilerOptions": {
-    "noEmit": true,
-    "emitDeclarationOnly": false
+    "target": "es2020",
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "declaration": true,
+    "moduleResolution": "Bundler",
+    "noEmit": true
   },
   "include": ["./src", "./demo", "./tests"]
 }
