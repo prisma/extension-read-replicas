@@ -73,17 +73,15 @@ prisma.$primary().user.findMany({ where: { ... }})
 
 ### Caveats and limitations
 
-At the moment, if you are using this read replicas extension alongside other extensions, this extension should be applied last:
-
-```ts
-const prisma = new PrismaClient()
-  .$extends(withAccelerate())
-  .$extends(rlsExtension())
-  .$extends(
-    readReplicas({
-      db: 'postgresql://replica.example.com:5432/db',
-    }),
-  )
-```
-
-If you are using the read replicas extension with Prisma version below 5.1, any result extensions will not work.
+- At the moment, if you are using this read replicas extension alongside other extensions, this extension should be applied last:
+  ```ts
+  const prisma = new PrismaClient()
+    .$extends(withAccelerate())
+    .$extends(rlsExtension())
+    .$extends(
+      readReplicas({
+        url: 'postgresql://replica.example.com:5432/db',
+      }),
+    )
+  ```
+- If you use the read replicas extension with Prisma version below 5.1, any result extensions will not work.
