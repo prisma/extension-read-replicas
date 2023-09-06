@@ -1,13 +1,10 @@
-import { debug as createDebug } from 'debug'
-import { Prisma } from '@prisma/client/extension'
+import { Prisma } from '@prisma/client/extension.js'
 
 import { ConfigureReplicaCallback, ReplicaManager } from './ReplicaManager'
 
 export type ReplicasOptions = {
   url: string | string[]
 }
-
-const debug = createDebug('prisma:replicasExtension')
 
 const readOperations = [
   'findFirst',
@@ -69,11 +66,9 @@ export const readReplicas = (options: ReplicasOptions, configureReplicaClient?: 
           __internalParams: { transaction },
         }) {
           if (transaction) {
-            debug('transactional query, using primary instance')
             return query(args)
           }
           if (readOperations.includes(operation)) {
-            debug(`read operation ${operation} on model ${model}, using replica`)
             const replica = replicaManager.pickReplica()
             if (model) {
               return replica[model][operation](args)
@@ -81,7 +76,6 @@ export const readReplicas = (options: ReplicasOptions, configureReplicaClient?: 
             return replica[operation](args)
           }
 
-          debug(`write operation ${operation} on model ${model}, using primary instance`)
           return query(args)
         },
       },
