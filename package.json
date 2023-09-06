@@ -4,7 +4,7 @@
   "description": "",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
-  "types": "types/index.d.ts",
+  "types": "dist/index.d.ts",
   "homepage": "https://github.com/prisma/extension-read-replicas",
   "repository": {
     "type": "git",
@@ -18,11 +18,11 @@
     ".": {
       "require": {
         "default": "./dist/index.js",
-        "types": "./types/index.d.ts"
+        "types": "./dist/index.d.ts"
       },
       "import": {
         "default": "./dist/index.mjs",
-        "types": "./types/index.d.mts"
+        "types": "./dist/index.d.mts"
       }
     }
   },
