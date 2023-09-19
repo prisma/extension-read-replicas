@@ -69,7 +69,7 @@ export const readReplicas = (options: ReplicasOptions, configureReplicaClient?: 
             return query(args)
           }
           if (readOperations.includes(operation)) {
-            const replica = replicaManager.pickReplica()
+            const replica = replicaManager.pickReplica() ?? client
             if (model) {
               return replica[model][operation](args)
             }

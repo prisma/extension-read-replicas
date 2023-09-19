@@ -11,7 +11,7 @@ function createPrisma() {
   const clientModule = require('./client')
   const basePrisma = new clientModule.PrismaClient() as PrismaClient
 
-  return basePrisma
+  const prisma = basePrisma
     .$extends(
       readReplicas(
         {
@@ -36,8 +36,11 @@ function createPrisma() {
         },
       },
     })
+
+  return [basePrisma, prisma] as const
 }
 
+let basePrisma: ReturnType<typeof createPrisma>
 let prisma: ReturnType<typeof createPrisma>
 
 beforeAll(async () => {
@@ -45,11 +48,43 @@ beforeAll(async () => {
     cwd: __dirname,
   })
 
-  prisma = createPrisma()
+  ;[basePrisma, prisma] = createPrisma()
 })
 
 beforeEach(async () => {
   logs = []
+})
+
+test('query is executed against primary when no replicas are configured', async () => {
+  const emptyPrisma = basePrisma
+    .$extends(
+      readReplicas(
+        {
+          url: [],
+        },
+        (client) =>
+          (client as PrismaClient).$extends({
+            query: {
+              $allOperations({ args, operation, query }) {
+                logs.push({ server: 'replica', operation })
+                return query(args)
+              },
+            },
+          }),
+      ),
+    )
+    .$extends({
+      query: {
+        $allOperations({ args, operation, query }) {
+          logs.push({ server: 'primary', operation })
+          return query(args)
+        },
+      },
+    })
+
+  await emptyPrisma.user.findMany()
+
+  expect(logs).toEqual([{ server: 'primary', operation: 'findMany' }])
 })
 
 test('read query is executed against replica', async () => {
