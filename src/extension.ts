@@ -33,6 +33,8 @@ export const readReplicas = (options: ReplicasOptions, configureReplicaClient?: 
       replicaUrls = [replicaUrls]
     } else if (!Array.isArray(replicaUrls)) {
       throw new Error(`Replica URLs must be a string or list of strings`)
+    } else if (replicaUrls.length === 0) {
+      throw new Error(`At least one replica URL must be specified`)
     }
 
     const replicaManager = new ReplicaManager({
@@ -69,7 +71,7 @@ export const readReplicas = (options: ReplicasOptions, configureReplicaClient?: 
             return query(args)
           }
           if (readOperations.includes(operation)) {
-            const replica = replicaManager.pickReplica() ?? client
+            const replica = replicaManager.pickReplica()
             if (model) {
               return replica[model][operation](args)
             }

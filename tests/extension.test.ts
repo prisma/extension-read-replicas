@@ -1,7 +1,7 @@
 import execa from 'execa'
 // @ts-ignore
-import type { PrismaClient } from './client'
 import { readReplicas } from '..'
+import type { PrismaClient } from './client'
 
 type LogEntry = { server: 'primary' | 'replica'; operation: string }
 
@@ -47,7 +47,6 @@ beforeAll(async () => {
   await execa('pnpm', ['prisma', 'db', 'push', '--schema', 'tests/prisma/schema.prisma'], {
     cwd: __dirname,
   })
-
   ;[basePrisma, prisma] = createPrisma()
 })
 
@@ -55,36 +54,15 @@ beforeEach(async () => {
   logs = []
 })
 
-test('query is executed against primary when no replicas are configured', async () => {
-  const emptyPrisma = basePrisma
-    .$extends(
-      readReplicas(
-        {
-          url: [],
-        },
-        (client) =>
-          (client as PrismaClient).$extends({
-            query: {
-              $allOperations({ args, operation, query }) {
-                logs.push({ server: 'replica', operation })
-                return query(args)
-              },
-            },
-          }),
-      ),
+test('client throws an error when given an empty read replica list', async () => {
+  const createInstance = () =>
+    basePrisma.$extends(
+      readReplicas({
+        url: [],
+      }),
     )
-    .$extends({
-      query: {
-        $allOperations({ args, operation, query }) {
-          logs.push({ server: 'primary', operation })
-          return query(args)
-        },
-      },
-    })
 
-  await emptyPrisma.user.findMany()
-
-  expect(logs).toEqual([{ server: 'primary', operation: 'findMany' }])
+  expect(createInstance).toThrowError('At least one replica URL must be specified')
 })
 
 test('read query is executed against replica', async () => {

@@ -39,7 +39,7 @@ export class ReplicaManager {
     await Promise.all(this._replicaClients.map((client) => client.$disconnect()))
   }
 
-  pickReplica(): PrismaClient | undefined {
+  pickReplica(): PrismaClient {
     return this._replicaClients[Math.floor(Math.random() * this._replicaClients.length)]
   }
 }
