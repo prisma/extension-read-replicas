@@ -43,7 +43,14 @@ export const readReplicas = (options: ReplicasOptions, configureReplicaClient?: 
 
     return client.$extends({
       client: {
-        $primary<T>(this: T): Omit<T, '$primary'> {
+        $primary<T extends object>(this: T): Omit<T, '$primary'> {
+          const context = Prisma.getExtensionContext(this)
+          // If we're in a transaction, the current client is connected to the
+          // primary.
+          if (!('$transaction' in context && typeof context.$transaction === 'function')) {
+            return context
+          }
+
           return client as unknown as Omit<T, '$primary'>
         },
 

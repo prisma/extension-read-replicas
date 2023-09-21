@@ -91,6 +91,14 @@ test('transactional queries are executed against primary (itx)', async () => {
   ])
 })
 
+test('calling $primary() on a transactional client returns itself', async () => {
+  expect.assertions(1)
+
+  await prisma.$transaction(async (tx) => {
+    expect(tx.$primary()).toBe(tx)
+  })
+})
+
 afterAll(async () => {
   await prisma.$disconnect()
 })
