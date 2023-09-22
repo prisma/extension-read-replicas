@@ -75,7 +75,7 @@ export const readReplicas = (options: ReplicasOptions, configureReplicaClient?: 
       },
 
       query: {
-        $allOperations({
+        async $allOperations({
           args,
           model,
           operation,
@@ -91,6 +91,39 @@ export const readReplicas = (options: ReplicasOptions, configureReplicaClient?: 
             if (model) {
               return replica[model][operation](args)
             }
+
+            if (operation === '$queryRaw') {
+              const rows = await replica[operation](args)
+              // HACK: Push into the mapped format Prisma expects when rehydrating
+              // result types.
+              // https://github.com/prisma/prisma/issues/21139
+              rows.forEach((row: Record<string, unknown>) => {
+                Object.keys(row).forEach((key) => {
+                  row[key] = {
+                    prisma__type: undefined,
+                    prisma__value: row[key],
+                  }
+                })
+              })
+              return rows
+            } else if (operation === '$queryRawUnsafe') {
+              // For $queryRawUnsafe methods, Prisma passes in args as an array
+              // to the extension, but expects values spread when called.
+              const rows = await replica[operation](...(args as [query: string, ...values: unknown[]]))
+              // HACK: Push into the mapped format Prisma expects when rehydrating
+              // result types.
+              // https://github.com/prisma/prisma/issues/21139
+              rows.forEach((row: Record<string, unknown>) => {
+                Object.keys(row).forEach((key) => {
+                  row[key] = {
+                    prisma__type: undefined,
+                    prisma__value: row[key],
+                  }
+                })
+              })
+              return rows
+            }
+
             return replica[operation](args)
           }
 
