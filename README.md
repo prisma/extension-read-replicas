@@ -98,3 +98,4 @@ prisma.$replica().$queryRaw`SELECT ...`
 ````
 
 - If you use the read replicas extension with Prisma version below 5.1, any result extensions will not work.
+- If you use `$queryRaw`, the query will by default route to the read replica, even for writes. To prevent this, make sure to use `.$primary()` on the client for any raw query writes.
