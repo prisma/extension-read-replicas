@@ -1,7 +1,7 @@
 import execa from 'execa'
 // @ts-ignore
-import type { PrismaClient } from './client'
 import { readReplicas } from '..'
+import type { PrismaClient } from './client'
 
 type LogEntry = { server: 'primary' | 'replica'; operation: string }
 
@@ -11,7 +11,7 @@ function createPrisma() {
   const clientModule = require('./client')
   const basePrisma = new clientModule.PrismaClient() as PrismaClient
 
-  return basePrisma
+  const prisma = basePrisma
     .$extends(
       readReplicas(
         {
@@ -36,20 +36,33 @@ function createPrisma() {
         },
       },
     })
+
+  return [basePrisma, prisma] as const
 }
 
+let basePrisma: ReturnType<typeof createPrisma>
 let prisma: ReturnType<typeof createPrisma>
 
 beforeAll(async () => {
   await execa('pnpm', ['prisma', 'db', 'push', '--schema', 'tests/prisma/schema.prisma'], {
     cwd: __dirname,
   })
-
-  prisma = createPrisma()
+  ;[basePrisma, prisma] = createPrisma()
 })
 
 beforeEach(async () => {
   logs = []
+})
+
+test('client throws an error when given an empty read replica list', async () => {
+  const createInstance = () =>
+    basePrisma.$extends(
+      readReplicas({
+        url: [],
+      }),
+    )
+
+  expect(createInstance).toThrowError('At least one replica URL must be specified')
 })
 
 test('read query is executed against replica', async () => {
