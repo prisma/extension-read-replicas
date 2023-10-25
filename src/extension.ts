@@ -45,8 +45,26 @@ export const readReplicas = (options: ReplicasOptions, configureReplicaClient?: 
 
     return client.$extends({
       client: {
-        $primary<T>(this: T): Omit<T, '$primary'> {
-          return client as unknown as Omit<T, '$primary'>
+        $primary<T extends object>(this: T): Omit<T, '$primary' | '$replica'> {
+          const context = Prisma.getExtensionContext(this)
+          // If we're in a transaction, the current client is connected to the
+          // primary.
+          if (!('$transaction' in context && typeof context.$transaction === 'function')) {
+            return context
+          }
+
+          return client as unknown as Omit<T, '$primary' | '$replica'>
+        },
+
+        $replica<T extends object>(this: T): Omit<T, '$primary' | '$replica'> {
+          const context = Prisma.getExtensionContext(this)
+          // If we're in a transaction, the current client is connected to the
+          // primary.
+          if (!('$transaction' in context && typeof context.$transaction === 'function')) {
+            throw new Error(`Cannot use $replica inside of a transaction`)
+          }
+
+          return replicaManager.pickReplica() as unknown as Omit<T, '$primary' | '$replica'>
         },
 
         async $connect() {

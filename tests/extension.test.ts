@@ -77,6 +77,26 @@ test('write query is executed against primary', async () => {
   expect(logs).toEqual([{ server: 'primary', operation: 'updateMany' }])
 })
 
+test('$executeRaw and $executeRawUnsafe are executed against primary', async () => {
+  await prisma.$executeRaw`SELECT 1;`
+  await prisma.$executeRawUnsafe('SELECT $1 as id;', 1)
+
+  expect(logs).toEqual([
+    { server: 'primary', operation: '$executeRaw' },
+    { server: 'primary', operation: '$executeRawUnsafe' },
+  ])
+})
+
+test('$executeRaw and $executeRawUnsafe are executed against replica if $replica() is used', async () => {
+  await prisma.$replica().$executeRaw`SELECT 1;`
+  await prisma.$replica().$executeRawUnsafe('SELECT $1 as id;', 1)
+
+  expect(logs).toEqual([
+    { server: 'replica', operation: '$executeRaw' },
+    { server: 'replica', operation: '$executeRawUnsafe' },
+  ])
+})
+
 test('read query is executed against primary if $primary() is used', async () => {
   await prisma.$primary().user.findMany()
 
