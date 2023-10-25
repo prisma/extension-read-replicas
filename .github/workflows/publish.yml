@@ -22,7 +22,7 @@ jobs:
           cache: 'pnpm'
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install
 
       - name: Version
         run: pnpm version --no-git-tag-version ${{ github.event.release.tag_name }}
