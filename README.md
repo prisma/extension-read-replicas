@@ -46,9 +46,9 @@ const prisma = new PrismaClient().$extends(
 All non-transactional read queries will now be executed against the defined replica.  
 Write queries and transactions will be executed against the primary server.
 
-**Note**: `queryRaw` and `executeRaw` are always executed against primary server by default since
-extension can not know for sure if particular raw query would read or write to the DB.
-Use `$replica()` method to explicitly route the request to read replica.
+**Note**: `queryRaw` and `executeRaw` are always executed against the primary server by default since
+the extension can not know for sure if a particular raw query would read or write to the database.
+Use the `$replica()` method to explicitly route the request to a read replica.
 
 ### Multiple replicas
 
