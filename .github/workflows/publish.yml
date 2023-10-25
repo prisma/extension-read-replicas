@@ -1,0 +1,36 @@
+name: Publish (latest)
+run-name: Publish ${{ github.event.release.tag_name }} to latest
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build:
+    name: Build and publish
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: pnpm/action-setup@v2.4.0
+        with:
+          version: 8
+
+      - uses: actions/setup-node@v3
+        with:
+          registry-url: 'https://registry.npmjs.org'
+          node-version: 16
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Version
+        run: pnpm version --no-git-tag-version ${{ github.event.release.tag_name }}
+
+      - name: Publish
+        run: |
+          pnpm config set "//registry.npmjs.org/:_authToken" "${NPM_TOKEN}"
+          pnpm publish --access public --tag latest --no-git-checks
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
