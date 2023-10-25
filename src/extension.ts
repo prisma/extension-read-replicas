@@ -15,8 +15,6 @@ const readOperations = [
   'groupBy',
   'aggregate',
   'count',
-  'queryRaw',
-  'queryRawUnsafe',
   'findRaw',
   'aggregateRaw',
 ]
