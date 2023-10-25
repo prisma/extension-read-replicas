@@ -75,16 +75,13 @@ If you want to execute a read query against the primary server, you can use the 
 prisma.$primary().user.findMany({ where: { ... }})
 ```
 
-### Forcing request to go through replica
+### Forcing request to go through a replica
 
-Sometimes you might want to do the opposite and route the request to the replica even though
-it will be routed to primary by default. In that case, you can use `$replica()` method:
+Sometimes you might want to do the opposite and route the request to a replica even though
+it will be routed to primary by default. In that case, you can use the `$replica()` method:
 
 ```ts
 prisma.$replica().$queryRaw`SELECT ...`
-```
-
-If multiple replicas are configured, random one will be selected.
 
 ### Caveats and limitations
 
