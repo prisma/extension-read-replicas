@@ -80,12 +80,14 @@ prisma.$primary().user.findMany({ where: { ... }})
 Sometimes you might want to do the opposite and route the request to a replica even though
 it will be routed to primary by default. In that case, you can use the `$replica()` method:
 
-````ts
+```ts
 prisma.$replica().$queryRaw`SELECT ...`
+```
 
 ### Caveats and limitations
 
 - At the moment, if you are using this read replicas extension alongside other extensions, this extension should be applied last:
+
   ```ts
   const prisma = new PrismaClient()
     .$extends(withAccelerate())
@@ -95,6 +97,6 @@ prisma.$replica().$queryRaw`SELECT ...`
         url: 'postgresql://replica.example.com:5432/db',
       }),
     )
-````
+  ```
 
 - If you use the read replicas extension with Prisma version below 5.1, any result extensions will not work.
