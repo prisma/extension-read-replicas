@@ -87,6 +87,7 @@ prisma.$replica().$queryRaw`SELECT ...`
 ### Caveats and limitations
 
 - At the moment, if you are using this read replicas extension alongside other extensions, this extension should be applied last:
+
   ```ts
   const prisma = new PrismaClient()
     .$extends(withAccelerate())
