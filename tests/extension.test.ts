@@ -124,6 +124,39 @@ test('transactional queries are executed against primary (itx)', async () => {
   ])
 })
 
+test('replica client with options', async () => {
+  let resolve: (value: unknown) => void
+  const promise = new Promise((res) => {
+    resolve = res
+  })
+  const prisma = basePrisma.$extends(
+    readReplicas(
+      {
+        url: process.env.REPLICA_URL!,
+        replicaClientOptions: {
+          log: [{ emit: 'event', level: 'query' }],
+        },
+      },
+      (client) => {
+        client.$on('query', () => {
+          logs.push({ server: 'replica', operation: 'replica logger' })
+          resolve('logged')
+        })
+        return client
+      },
+    ),
+  )
+
+  await prisma.user.findMany()
+  await promise
+  expect(logs).toEqual([
+    {
+      operation: `replica logger`,
+      server: 'replica',
+    },
+  ])
+})
+
 afterAll(async () => {
   await prisma.$disconnect()
 })

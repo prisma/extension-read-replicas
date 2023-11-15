@@ -1,9 +1,11 @@
 import { Prisma } from '@prisma/client/extension.js'
 
 import { ConfigureReplicaCallback, ReplicaManager } from './ReplicaManager'
+import { PrismaClientOptions } from '@prisma/client/runtime/library'
 
 export type ReplicasOptions = {
   url: string | string[]
+  replicaClientOptions?: PrismaClientOptions
 }
 
 const readOperations = [
@@ -38,6 +40,7 @@ export const readReplicas = (options: ReplicasOptions, configureReplicaClient?: 
     const replicaManager = new ReplicaManager({
       replicaUrls,
       clientConstructor: PrismaClient,
+      replicaClientOptions: options.replicaClientOptions,
       configureCallback: configureReplicaClient,
     })
 
