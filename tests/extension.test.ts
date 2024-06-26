@@ -71,6 +71,24 @@ test('read query is executed against replica', async () => {
   expect(logs).toEqual([{ server: 'replica', operation: 'findMany' }])
 })
 
+test('read query can resolve fluent queries against replica', async () => {
+  await prisma.user.create({
+    data: {
+      email: 'user@example.com',
+      posts: {
+        create: [{}],
+      },
+    },
+  })
+  const res = await prisma.user.findFirst().posts().author().posts().author()
+
+  expect(logs).toEqual([
+    { server: 'primary', operation: 'create' },
+    { server: 'replica', operation: 'findFirst' },
+  ])
+  expect(res).toMatchObject([{ email: 'user@example.com' }])
+})
+
 test('write query is executed against primary', async () => {
   await prisma.user.updateMany({ data: {} })
 
