@@ -1,12 +1,13 @@
-import { Prisma } from '@prisma/client/extension.js'
+import { Prisma, PrismaClient } from '@prisma/client/extension.js'
 
 import { ConfigureReplicaCallback, ReplicaManager } from './ReplicaManager'
-import { PrismaClientOptions } from '@prisma/client/runtime/library'
 
-export type ReplicasOptions = {
-  url: string | string[]
-  replicaClientOptions?: PrismaClientOptions
-}
+export type ReplicasOptions =
+  | {
+      url: string | string[]
+      replicas?: PrismaClient[]
+    }
+  | { url?: string | string[]; replicas: PrismaClient[] }
 
 const readOperations = [
   'findFirst',
@@ -29,18 +30,29 @@ export const readReplicas = (options: ReplicasOptions, configureReplicaClient?: 
       throw new Error(`Read replicas options must specify a datasource`)
     }
     let replicaUrls = options.url
+
+    if (!replicaUrls && !options.replicas) {
+      throw new Error(`At least one replica URL or replica client must be specified`)
+    }
+
     if (typeof replicaUrls === 'string') {
       replicaUrls = [replicaUrls]
-    } else if (!Array.isArray(replicaUrls)) {
+    } else if (replicaUrls && !Array.isArray(replicaUrls)) {
       throw new Error(`Replica URLs must be a string or list of strings`)
-    } else if (replicaUrls.length === 0) {
+    }
+
+    if (replicaUrls?.length === 0) {
       throw new Error(`At least one replica URL must be specified`)
+    }
+
+    if (options.replicas?.length === 0) {
+      throw new Error(`At least one replica must be specified`)
     }
 
     const replicaManager = new ReplicaManager({
       replicaUrls,
+      replicas: options.replicas,
       clientConstructor: PrismaClient,
-      replicaClientOptions: options.replicaClientOptions,
       configureCallback: configureReplicaClient,
     })
 

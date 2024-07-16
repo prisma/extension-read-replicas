@@ -1,33 +1,37 @@
 import { PrismaClient } from '@prisma/client/extension'
-import { PrismaClientOptions } from '@prisma/client/runtime/library'
+
+type PrismaConstructorOptions = {
+  datasourceUrl?: string
+}
 
 export type ConfigureReplicaCallback = (client: PrismaClient) => PrismaClient
 interface PrismaClientConstructor {
-  new (options?: PrismaClientOptions): PrismaClient
+  new (options?: PrismaConstructorOptions): PrismaClient
 }
 
 type ReplicaManagerOptions = {
   clientConstructor: PrismaClientConstructor
-  replicaUrls: string[]
-  replicaClientOptions?: PrismaClientOptions
+  replicaUrls?: string[]
+  replicas?: PrismaClient[]
   configureCallback: ConfigureReplicaCallback | undefined
 }
 
 export class ReplicaManager {
   private _replicaClients: PrismaClient[]
 
-  constructor({ replicaUrls, replicaClientOptions, clientConstructor, configureCallback }: ReplicaManagerOptions) {
-    this._replicaClients = replicaUrls.map((datasourceUrl) => {
-      const client = new clientConstructor({
-        datasourceUrl,
-        ...replicaClientOptions,
-      })
+  constructor({ replicaUrls = [], replicas = [], clientConstructor, configureCallback }: ReplicaManagerOptions) {
+    this._replicaClients = replicaUrls
+      .map((datasourceUrl) => {
+        const client = new clientConstructor({
+          datasourceUrl,
+        })
 
-      if (configureCallback) {
-        return configureCallback(client)
-      }
-      return client
-    })
+        if (configureCallback) {
+          return configureCallback(client)
+        }
+        return client
+      })
+      .concat(replicas)
   }
 
   async connectAll() {

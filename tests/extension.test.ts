@@ -54,7 +54,7 @@ beforeEach(async () => {
   logs = []
 })
 
-test('client throws an error when given an empty read replica list', async () => {
+test('client throws an error when given an empty read replica url list', async () => {
   const createInstance = () =>
     basePrisma.$extends(
       readReplicas({
@@ -63,6 +63,17 @@ test('client throws an error when given an empty read replica list', async () =>
     )
 
   expect(createInstance).toThrowError('At least one replica URL must be specified')
+})
+
+test('client throws an error when given an empty read replica list', async () => {
+  const createInstance = () =>
+    basePrisma.$extends(
+      readReplicas({
+        replicas: [],
+      }),
+    )
+
+  expect(createInstance).toThrowError('At least one replica must be specified')
 })
 
 test('read query is executed against replica', async () => {
@@ -129,22 +140,22 @@ test('replica client with options', async () => {
   const promise = new Promise((res) => {
     resolve = res
   })
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const clientModule = require('./client')
+  const replicaPrisma = new clientModule.PrismaClient({
+    datasourceUrl: process.env.REPLICA_URL!,
+    log: [{ emit: 'event', level: 'query' }],
+  })
+
+  replicaPrisma.$on('query', () => {
+    logs.push({ server: 'replica', operation: 'replica logger' })
+    resolve('logged')
+  })
+
   const prisma = basePrisma.$extends(
-    readReplicas(
-      {
-        url: process.env.REPLICA_URL!,
-        replicaClientOptions: {
-          log: [{ emit: 'event', level: 'query' }],
-        },
-      },
-      (client) => {
-        client.$on('query', () => {
-          logs.push({ server: 'replica', operation: 'replica logger' })
-          resolve('logged')
-        })
-        return client
-      },
-    ),
+    readReplicas({
+      replicas: [replicaPrisma],
+    }),
   )
 
   await prisma.user.findMany()
