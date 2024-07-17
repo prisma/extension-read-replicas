@@ -1,13 +1,12 @@
 import { Prisma, PrismaClient } from '@prisma/client/extension.js'
 
-import { ConfigureReplicaCallback, ReplicaManager } from './ReplicaManager'
+import { ConfigureReplicaCallback, ReplicaManager, type ReplicaManagerOptions } from './ReplicaManager'
 
 export type ReplicasOptions =
   | {
       url: string | string[]
-      replicas?: PrismaClient[]
     }
-  | { url?: string | string[]; replicas: PrismaClient[] }
+  | { replicas: PrismaClient[] }
 
 const readOperations = [
   'findFirst',
@@ -29,32 +28,43 @@ export const readReplicas = (options: ReplicasOptions, configureReplicaClient?: 
     if (!datasourceName) {
       throw new Error(`Read replicas options must specify a datasource`)
     }
-    let replicaUrls = options.url
 
-    if (!replicaUrls && !options.replicas) {
-      throw new Error(`At least one replica URL or replica client must be specified`)
+    if ('url' in options && 'replicas' in options) {
+      throw new Error(`Only one of 'url' or 'replicas' can be specified`)
     }
 
-    if (typeof replicaUrls === 'string') {
-      replicaUrls = [replicaUrls]
-    } else if (replicaUrls && !Array.isArray(replicaUrls)) {
-      throw new Error(`Replica URLs must be a string or list of strings`)
+    let replicaManagerOptions: ReplicaManagerOptions
+
+    if ('url' in options) {
+      let replicaUrls = options.url
+
+      if (typeof replicaUrls === 'string') {
+        replicaUrls = [replicaUrls]
+      } else if (replicaUrls && !Array.isArray(replicaUrls)) {
+        throw new Error(`Replica URLs must be a string or list of strings`)
+      }
+
+      if (replicaUrls.length === 0) {
+        throw new Error(`At least one replica URL must be specified`)
+      }
+
+      replicaManagerOptions = {
+        replicaUrls: replicaUrls,
+        clientConstructor: PrismaClient,
+        configureCallback: configureReplicaClient,
+      }
+    } else if ('replicas' in options) {
+      if (options.replicas.length === 0) {
+        throw new Error(`At least one replica must be specified`)
+      }
+      replicaManagerOptions = {
+        replicas: options.replicas,
+      }
+    } else {
+      throw new Error(`Invalid read replicas options`)
     }
 
-    if (replicaUrls?.length === 0) {
-      throw new Error(`At least one replica URL must be specified`)
-    }
-
-    if (options.replicas?.length === 0) {
-      throw new Error(`At least one replica must be specified`)
-    }
-
-    const replicaManager = new ReplicaManager({
-      replicaUrls,
-      replicas: options.replicas,
-      clientConstructor: PrismaClient,
-      configureCallback: configureReplicaClient,
-    })
+    const replicaManager = new ReplicaManager(replicaManagerOptions)
 
     return client.$extends({
       client: {

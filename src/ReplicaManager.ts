@@ -9,29 +9,36 @@ interface PrismaClientConstructor {
   new (options?: PrismaConstructorOptions): PrismaClient
 }
 
-type ReplicaManagerOptions = {
-  clientConstructor: PrismaClientConstructor
-  replicaUrls?: string[]
-  replicas?: PrismaClient[]
-  configureCallback: ConfigureReplicaCallback | undefined
-}
+export type ReplicaManagerOptions =
+  | {
+      clientConstructor: PrismaClientConstructor
+      replicaUrls: string[]
+      configureCallback: ConfigureReplicaCallback | undefined
+    }
+  | {
+      replicas: PrismaClient[]
+    }
 
 export class ReplicaManager {
   private _replicaClients: PrismaClient[]
 
-  constructor({ replicaUrls = [], replicas = [], clientConstructor, configureCallback }: ReplicaManagerOptions) {
-    this._replicaClients = replicaUrls
-      .map((datasourceUrl) => {
-        const client = new clientConstructor({
-          datasourceUrl,
-        })
+  constructor(options: ReplicaManagerOptions) {
+    if ('replicas' in options) {
+      this._replicaClients = options.replicas
+      return
+    }
 
-        if (configureCallback) {
-          return configureCallback(client)
-        }
-        return client
+    const { replicaUrls, clientConstructor, configureCallback } = options
+    this._replicaClients = replicaUrls.map((datasourceUrl) => {
+      const client = new clientConstructor({
+        datasourceUrl,
       })
-      .concat(replicas)
+
+      if (configureCallback) {
+        return configureCallback(client)
+      }
+      return client
+    })
   }
 
   async connectAll() {

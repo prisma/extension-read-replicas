@@ -76,6 +76,36 @@ test('client throws an error when given an empty read replica list', async () =>
   expect(createInstance).toThrowError('At least one replica must be specified')
 })
 
+test('client throws an error when given both a URL and a list of replicas', async () => {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const clientModule = require('./client')
+  const replicaPrisma = new clientModule.PrismaClient({
+    datasourceUrl: process.env.REPLICA_URL!,
+    log: [{ emit: 'event', level: 'query' }],
+  })
+  const createInstance = () =>
+    basePrisma.$extends(
+      readReplicas({
+        url: process.env.REPLICA_URL!,
+        replicas: [replicaPrisma],
+      }),
+    )
+
+  expect(createInstance).toThrowError(`Only one of 'url' or 'replicas' can be specified`)
+})
+
+test('client throws an error when given an invalid read replicas options', async () => {
+  const createInstance = () =>
+    basePrisma.$extends(
+      readReplicas({
+        // @ts-expect-error
+        foo: 'bar',
+      }),
+    )
+
+  expect(createInstance).toThrowError('Invalid read replicas options')
+})
+
 test('read query is executed against replica', async () => {
   await prisma.user.findMany()
 
