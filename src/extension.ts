@@ -5,8 +5,9 @@ import { ConfigureReplicaCallback, ReplicaManager, type ReplicaManagerOptions } 
 export type ReplicasOptions =
   | {
       url: string | string[]
+      replicas?: undefined
     }
-  | { replicas: PrismaClient[] }
+  | { url?: undefined; replicas: PrismaClient[] }
 
 const readOperations = [
   'findFirst',
@@ -35,7 +36,7 @@ export const readReplicas = (options: ReplicasOptions, configureReplicaClient?: 
 
     let replicaManagerOptions: ReplicaManagerOptions
 
-    if ('url' in options) {
+    if (options.url) {
       let replicaUrls = options.url
 
       if (typeof replicaUrls === 'string') {
@@ -44,7 +45,7 @@ export const readReplicas = (options: ReplicasOptions, configureReplicaClient?: 
         throw new Error(`Replica URLs must be a string or list of strings`)
       }
 
-      if (replicaUrls.length === 0) {
+      if (replicaUrls?.length === 0) {
         throw new Error(`At least one replica URL must be specified`)
       }
 
@@ -53,7 +54,7 @@ export const readReplicas = (options: ReplicasOptions, configureReplicaClient?: 
         clientConstructor: PrismaClient,
         configureCallback: configureReplicaClient,
       }
-    } else if ('replicas' in options) {
+    } else if (options.replicas) {
       if (options.replicas.length === 0) {
         throw new Error(`At least one replica must be specified`)
       }
