@@ -14,13 +14,13 @@ jobs:
       # see https://docs.npmjs.com/generating-provenance-statements
       id-token: write
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - uses: pnpm/action-setup@v2.4.0
+      - uses: pnpm/action-setup@v4
         with:
           version: 8
 
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           registry-url: 'https://registry.npmjs.org'
           node-version: 20
