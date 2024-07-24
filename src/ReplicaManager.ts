@@ -9,16 +9,26 @@ interface PrismaClientConstructor {
   new (options?: PrismaConstructorOptions): PrismaClient
 }
 
-type ReplicaManagerOptions = {
-  clientConstructor: PrismaClientConstructor
-  replicaUrls: string[]
-  configureCallback: ConfigureReplicaCallback | undefined
-}
+export type ReplicaManagerOptions =
+  | {
+      clientConstructor: PrismaClientConstructor
+      replicaUrls: string[]
+      configureCallback: ConfigureReplicaCallback | undefined
+    }
+  | {
+      replicas: PrismaClient[]
+    }
 
 export class ReplicaManager {
   private _replicaClients: PrismaClient[]
 
-  constructor({ replicaUrls, clientConstructor, configureCallback }: ReplicaManagerOptions) {
+  constructor(options: ReplicaManagerOptions) {
+    if ('replicas' in options) {
+      this._replicaClients = options.replicas
+      return
+    }
+
+    const { replicaUrls, clientConstructor, configureCallback } = options
     this._replicaClients = replicaUrls.map((datasourceUrl) => {
       const client = new clientConstructor({
         datasourceUrl,
