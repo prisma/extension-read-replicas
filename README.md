@@ -67,6 +67,27 @@ const prisma = new PrismaClient().$extends(
 
 In this case, a replica for each read query will be selected randomly.
 
+### Pre-configured clients
+
+If you want to supply additional options to replica client, you can also pass pre-configured read clients instead of urls:
+
+```ts
+const replicaClient = new PrismaClient({
+  datasourceUrl: 'postgresql://replica.example.com:5432/db'
+  log: [{ level: 'query', emit: 'event' }]
+})
+
+replicaClient.$on('query', (event) => console.log('Replica event', event))
+
+const prisma = new PrismaClient().$extends(
+  readReplicas({
+    replicas: [
+      replicaClient
+    ],
+  }),
+)
+```
+
 ### Bypassing the replicas
 
 If you want to execute a read query against the primary server, you can use the `$primary()` method on your extended client:
