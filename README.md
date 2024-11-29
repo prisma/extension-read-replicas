@@ -121,3 +121,17 @@ prisma.$replica().$queryRaw`SELECT ...`
   ```
 
 - If you use the read replicas extension with Prisma version below 5.1, any result extensions will not work.
+
+## Development
+
+Note: To run the tests, you need to have Docker installed and running.
+
+- Run `docker-compose up` to start the Postgres primary and replica
+- Set the environment variables `DATABASE_URL` and `REPLICA_URL` to the connection strings for the primary and replica:
+
+  ```sh
+  export DATABASE_URL='postgresql://prisma:prisma@localhost:6432/test'
+  export REPLICA_URL='postgresql://prisma:prisma@localhost:7432/test'
+  ```
+
+- Run `pnpm test` to run the tests
