@@ -1,4 +1,3 @@
-version: '3.8'
 services:
   postgresql-primary:
     # using bitnami images because unlike official postgres images,
