@@ -8,7 +8,7 @@ export type ReplicasOptions =
       replicas?: undefined
       defaultReadClient?: 'primary' | 'replica'
     }
-  | { url?: undefined; replicas: PrismaClient[]; defaultReadClient: 'replica' }
+  | { url?: undefined; replicas: PrismaClient[]; defaultReadClient?: 'primary' | 'replica' }
 
 const readOperations = [
   'findFirst',
