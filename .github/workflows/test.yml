@@ -22,7 +22,7 @@ jobs:
       - name: Lint
         run: pnpm lint
       - name: Start test container in docker
-        run: docker-compose up --detach
+        run: docker compose up --detach
       - name: Run tests
         run: pnpm test -- --ci
         env:
