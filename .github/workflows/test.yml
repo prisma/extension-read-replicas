@@ -10,11 +10,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
-        with:
-          version: 8
       - uses: actions/setup-node@v4
         with:
-          node-version: 16
+          node-version: 20
           cache: 'pnpm'
       - run: pnpm install --frozen-lockfile
       - name: Build
@@ -22,7 +20,7 @@ jobs:
       - name: Lint
         run: pnpm lint
       - name: Start test container in docker
-        run: docker-compose up --detach
+        run: docker compose up --detach
       - name: Run tests
         run: pnpm test -- --ci
         env:
