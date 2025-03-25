@@ -6,8 +6,9 @@ export type ReplicasOptions =
   | {
       url: string | string[]
       replicas?: undefined
+      defaultReadClient?: 'primary' | 'replica'
     }
-  | { url?: undefined; replicas: PrismaClient[] }
+  | { url?: undefined; replicas: PrismaClient[]; defaultReadClient?: 'primary' | 'replica' }
 
 const readOperations = [
   'findFirst',
@@ -112,6 +113,11 @@ export const readReplicas = (options: ReplicasOptions, configureReplicaClient?: 
           if (transaction) {
             return query(args)
           }
+
+          if (options.defaultReadClient === 'primary') {
+            return query(args)
+          }
+
           if (readOperations.includes(operation)) {
             const replica = replicaManager.pickReplica()
             if (model) {

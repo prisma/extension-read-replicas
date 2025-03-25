@@ -16,6 +16,7 @@ function createPrisma() {
       readReplicas(
         {
           url: process.env.REPLICA_URL!,
+          defaultReadClient: 'replica',
         },
         (client) =>
           (client as PrismaClient).$extends({
@@ -37,17 +38,45 @@ function createPrisma() {
       },
     })
 
-  return [basePrisma, prisma] as const
+  const prismaDefaultPrimary = basePrisma
+    .$extends(
+      readReplicas(
+        {
+          url: process.env.REPLICA_URL!,
+          defaultReadClient: 'primary',
+        },
+        (client) =>
+          (client as PrismaClient).$extends({
+            query: {
+              $allOperations({ args, operation, query }) {
+                logs.push({ server: 'replica', operation })
+                return query(args)
+              },
+            },
+          }),
+      ),
+    )
+    .$extends({
+      query: {
+        $allOperations({ args, operation, query }) {
+          logs.push({ server: 'primary', operation })
+          return query(args)
+        },
+      },
+    })
+
+  return [basePrisma, prisma, prismaDefaultPrimary] as const
 }
 
 let basePrisma: ReturnType<typeof createPrisma>
 let prisma: ReturnType<typeof createPrisma>
+let prismaDefaultPrimary: ReturnType<typeof createPrisma>
 
 beforeAll(async () => {
   await execa('pnpm', ['prisma', 'db', 'push', '--schema', 'tests/prisma/schema.prisma'], {
     cwd: __dirname,
   })
-  ;[basePrisma, prisma] = createPrisma()
+  ;[basePrisma, prisma, prismaDefaultPrimary] = createPrisma()
 })
 
 beforeEach(async () => {
@@ -108,6 +137,18 @@ test('client throws an error when given an invalid read replicas options', async
 
 test('read query is executed against replica', async () => {
   await prisma.user.findMany()
+
+  expect(logs).toEqual([{ server: 'replica', operation: 'findMany' }])
+})
+
+test('read query is executed against primary if defaultReadClient is set to primary', async () => {
+  await prismaDefaultPrimary.user.findMany()
+
+  expect(logs).toEqual([{ server: 'primary', operation: 'findMany' }])
+})
+
+test('read query is executed against replica if $replica() is used', async () => {
+  await prisma.$replica().user.findMany()
 
   expect(logs).toEqual([{ server: 'replica', operation: 'findMany' }])
 })
