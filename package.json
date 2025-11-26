@@ -33,6 +33,7 @@
     "prepare": "husky install",
     "prepublishOnly": "pnpm build",
     "test": "jest",
+    "test:ci": "jest --ci",
     "typecheck": "tsc"
   },
   "keywords": [],

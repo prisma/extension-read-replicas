@@ -22,7 +22,7 @@ jobs:
       - name: Start test container in docker
         run: docker compose up --detach
       - name: Run tests
-        run: pnpm test -- --ci
+        run: pnpm test:ci
         env:
           DATABASE_URL: 'postgresql://prisma:prisma@localhost:6432/test'
           REPLICA_URL: 'postgresql://prisma:prisma@localhost:7432/test'
