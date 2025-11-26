@@ -1,7 +1,18 @@
-import { PrismaClient } from '@prisma/client'
-import { readReplicas } from '..'
+import { PrismaPg } from '@prisma/adapter-pg'
+import { PrismaClient } from './generated/prisma/client'
+import { readReplicas } from '../../dist'
 
-const client = new PrismaClient().$extends(readReplicas({ url: process.env.REPLICA_URL! }))
+const mainAdapter = new PrismaPg({
+  connectionString: process.env.DATABASE_URL!,
+})
+
+const replicaAdapter = new PrismaPg({
+  connectionString: process.env.REPLICA_URL!,
+})
+
+const replicaClient = new PrismaClient({ adapter: replicaAdapter })
+
+const client = new PrismaClient({ adapter: mainAdapter }).$extends(readReplicas({ replicas: [replicaClient] }))
 
 async function main() {
   await client.user.deleteMany()
@@ -29,6 +40,9 @@ async function main() {
 
   console.log('replica with result extension:', await xclient1.user.findFirstOrThrow())
   console.log('primary with result extension:', await xclient1.$primary().user.findFirstOrThrow())
+
+  await replicaClient.$disconnect()
+  await client.$disconnect()
 }
 
 main()

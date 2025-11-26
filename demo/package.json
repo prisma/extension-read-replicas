@@ -1,5 +1,14 @@
 {
   "name": "replicas-demo",
   "version": "1.0.0",
-  "private": true
+  "private": true,
+  "dependencies": {
+    "@prisma/adapter-pg": "^7.0.0",
+    "@prisma/client": "^7.0.0",
+    "pg": "^8.16.3"
+  },
+  "devDependencies": {
+    "@types/pg": "^8.15.6",
+    "prisma": "^7.0.0"
+  }
 }
