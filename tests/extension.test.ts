@@ -1,32 +1,50 @@
 import execa from 'execa'
+import { PrismaPg } from '@prisma/adapter-pg'
 // @ts-ignore
 import { readReplicas } from '..'
-import type { PrismaClient } from './client'
+import type { PrismaClient } from './generated/prisma'
 
 type LogEntry = { server: 'primary' | 'replica'; operation: string }
 
 let logs: LogEntry[]
+let replicaClients: PrismaClient[] = []
+
 function createPrisma() {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const clientModule = require('./client')
-  const basePrisma = new clientModule.PrismaClient() as PrismaClient
+  const clientModule = require('./generated/prisma')
+
+  // Create adapters for Prisma 7
+  const mainAdapter = new PrismaPg({
+    connectionString: process.env.DATABASE_URL!,
+  })
+  const replicaAdapter = new PrismaPg({
+    connectionString: process.env.REPLICA_URL!,
+  })
+
+  const basePrisma = new clientModule.PrismaClient({ adapter: mainAdapter }) as PrismaClient
+
+  // Create replica client with Prisma 7 configuration
+  const replicaClient = new clientModule.PrismaClient({
+    adapter: replicaAdapter,
+  }) as PrismaClient
+
+  // Track replica clients for cleanup
+  replicaClients.push(replicaClient)
+
+  const replicaClientWithLogging = replicaClient.$extends({
+    query: {
+      $allOperations({ args, operation, query }) {
+        logs.push({ server: 'replica', operation })
+        return query(args)
+      },
+    },
+  })
 
   const prisma = basePrisma
     .$extends(
-      readReplicas(
-        {
-          url: process.env.REPLICA_URL!,
-        },
-        (client) =>
-          (client as PrismaClient).$extends({
-            query: {
-              $allOperations({ args, operation, query }) {
-                logs.push({ server: 'replica', operation })
-                return query(args)
-              },
-            },
-          }),
-      ),
+      readReplicas({
+        replicas: [replicaClientWithLogging],
+      }),
     )
     .$extends({
       query: {
@@ -40,11 +58,14 @@ function createPrisma() {
   return [basePrisma, prisma] as const
 }
 
-let basePrisma: ReturnType<typeof createPrisma>
-let prisma: ReturnType<typeof createPrisma>
+let basePrisma: PrismaClient
+let prisma: ReturnType<typeof createPrisma>[1]
 
 beforeAll(async () => {
-  await execa('pnpm', ['prisma', 'db', 'push', '--schema', 'tests/prisma/schema.prisma'], {
+  await execa('pnpm', ['prisma', 'db', 'push'], {
+    cwd: __dirname,
+  })
+  await execa('pnpm', ['prisma', 'generate'], {
     cwd: __dirname,
   })
   ;[basePrisma, prisma] = createPrisma()
@@ -52,17 +73,6 @@ beforeAll(async () => {
 
 beforeEach(async () => {
   logs = []
-})
-
-test('client throws an error when given an empty read replica url list', async () => {
-  const createInstance = () =>
-    basePrisma.$extends(
-      readReplicas({
-        url: [],
-      }),
-    )
-
-  expect(createInstance).toThrowError('At least one replica URL must be specified')
 })
 
 test('client throws an error when given an empty read replica list', async () => {
@@ -74,36 +84,6 @@ test('client throws an error when given an empty read replica list', async () =>
     )
 
   expect(createInstance).toThrowError('At least one replica must be specified')
-})
-
-test('client throws an error when given both a URL and a list of replicas', async () => {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const clientModule = require('./client')
-  const replicaPrisma = new clientModule.PrismaClient({
-    datasourceUrl: process.env.REPLICA_URL!,
-    log: [{ emit: 'event', level: 'query' }],
-  })
-  const createInstance = () =>
-    basePrisma.$extends(
-      readReplicas({
-        url: process.env.REPLICA_URL!,
-        replicas: [replicaPrisma],
-      }),
-    )
-
-  expect(createInstance).toThrowError(`Only one of 'url' or 'replicas' can be specified`)
-})
-
-test('client throws an error when given an invalid read replicas options', async () => {
-  const createInstance = () =>
-    basePrisma.$extends(
-      readReplicas({
-        // @ts-expect-error
-        foo: 'bar',
-      }),
-    )
-
-  expect(createInstance).toThrowError('Invalid read replicas options')
 })
 
 test('read query is executed against replica', async () => {
@@ -155,7 +135,7 @@ test('transactional queries are executed against primary (sequential)', async ()
 })
 
 test('transactional queries are executed against primary (itx)', async () => {
-  await prisma.$transaction(async (tx) => {
+  await prisma.$transaction(async (tx: any) => {
     await tx.user.findMany()
     await tx.user.updateMany({ data: {} })
   })
@@ -171,24 +151,29 @@ test('replica client with options', async () => {
     resolve = res
   })
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const clientModule = require('./client')
-  const replicaPrisma = new clientModule.PrismaClient({
-    datasourceUrl: process.env.REPLICA_URL!,
-    log: [{ emit: 'event', level: 'query' }],
+  const clientModule = require('./generated/prisma')
+  const replicaAdapter = new PrismaPg({
+    connectionString: process.env.REPLICA_URL!,
   })
+  const replicaPrisma = new clientModule.PrismaClient({
+    adapter: replicaAdapter,
+    log: [{ emit: 'event', level: 'query' }],
+  }) as PrismaClient
 
-  replicaPrisma.$on('query', () => {
+  // Track this replica client for cleanup
+  replicaClients.push(replicaPrisma)
+  ;(replicaPrisma as any).$on('query', () => {
     logs.push({ server: 'replica', operation: 'replica logger' })
     resolve('logged')
   })
 
-  const prisma = basePrisma.$extends(
+  const testPrisma = basePrisma.$extends(
     readReplicas({
       replicas: [replicaPrisma],
     }),
   )
 
-  await prisma.user.findMany()
+  await testPrisma.user.findMany()
   await promise
   expect(logs).toEqual([
     {
@@ -196,8 +181,18 @@ test('replica client with options', async () => {
       server: 'replica',
     },
   ])
+
+  // Clean up the test client (this will also disconnect replicaPrisma via the extension)
+  await testPrisma.$disconnect()
+  // Remove from tracking since it's already disconnected
+  replicaClients = replicaClients.filter((client) => client !== replicaPrisma)
 })
 
 afterAll(async () => {
+  // Disconnect main extended client first (this will disconnect its replicas via the extension)
   await prisma.$disconnect()
+  // Disconnect base client
+  await basePrisma.$disconnect()
+  // Disconnect any remaining standalone replica clients (shouldn't be any, but just in case)
+  await Promise.all(replicaClients.map((client) => client.$disconnect().catch(() => {})))
 })
