@@ -28,7 +28,7 @@ jobs:
         run: pnpm install
 
       - name: Version
-        run: pnpm version --no-git-tag-version ${{ github.event.release.tag_name }}
+        run: pnpm version --allow-same-version --no-git-tag-version ${{ github.event.release.tag_name }}
 
       - name: Publish
         run: |
