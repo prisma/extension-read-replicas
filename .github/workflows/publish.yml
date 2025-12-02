@@ -24,6 +24,9 @@ jobs:
           node-version: 20
           cache: 'pnpm'
 
+      - name: Update npm to support Trusted Publishers
+        run: npm install -g npm@^11.5
+
       - name: Install dependencies
         run: pnpm install
 
