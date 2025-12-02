@@ -31,10 +31,4 @@ jobs:
         run: pnpm version --allow-same-version --no-git-tag-version ${{ github.event.release.tag_name }}
 
       - name: Publish
-        run: |
-          pnpm config set "//registry.npmjs.org/:_authToken" "${NPM_TOKEN}"
-          pnpm publish --access public --tag latest --no-git-checks
-        env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-          # https://docs.npmjs.com/generating-provenance-statements
-          NPM_CONFIG_PROVENANCE: true
+        run: pnpm publish --access public --provenance --tag latest --no-git-checks
