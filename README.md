@@ -6,6 +6,8 @@ This [Prisma Client Extension](https://www.prisma.io/docs/concepts/components/pr
 
 Requires Prisma 7.0+.
 
+_For Prisma 6.x support, please install [`@prisma/extension-read-replicas` version 0.4.1](https://www.npmjs.com/package/@prisma/extension-read-replicas/v/0.4.1)_
+
 ## Installation
 
 Depending on the package manager of your choice:
