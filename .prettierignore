@@ -3,3 +3,4 @@ node_modules
 /dist
 /tests/client
 pnpm-lock.yaml
+**/generated/**

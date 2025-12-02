@@ -2,3 +2,5 @@ node_modules
 /types
 /dist
 /tests/client
+demo/src/generated
+tests/generated
