@@ -63,22 +63,40 @@ export const readReplicas = (options: ReplicasOptions) =>
       },
 
       query: {
-        $allOperations({
+        async $allOperations({
           args,
           model,
           operation,
           query,
-          // @ts-expect-error
-          __internalParams: { transaction },
+          // @ts-expect-error We make use of internal APIs to make this extension work.
+          __internalParams: { transaction, dataPath },
         }) {
           if (transaction) {
             return query(args)
           }
           if (readOperations.includes(operation)) {
             const replica = replicaManager.pickReplica()
+
             if (model) {
-              return replica[model][operation](args)
+              let result = await replica[model][operation](args)
+
+              // HACK: Work around lack of read replica support by leveraging
+              // dataPath. We expect dataPath to be in the following format:
+              // [ 'select', 'fieldNameOne', 'select', 'fieldNameTwo' ]
+              // Given this format, we'll read every second string to get the
+              // expected response type.
+              const path = dataPath as string[]
+              for (let i = 1; i < path.length; i += 2) {
+                if (Array.isArray(result)) {
+                  result = result.flatMap((item) => item?.[path[i]])
+                } else {
+                  result = result?.[path[i]]
+                }
+              }
+
+              return result
             }
+
             return replica[operation](args)
           }
 
